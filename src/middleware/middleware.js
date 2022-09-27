@@ -1,9 +1,9 @@
 exports.middlewareGlobal = (req, res,next)=>{
-    console.log()
-    
+    res.locals.umaVariavelLocal = 'este é o valor';
+    /*
     if(req.body.cliente){
         console.log(`vi que vc postou ${req.body.cliente}`)
     }
-    console.log()
+    */
     next()
 }
