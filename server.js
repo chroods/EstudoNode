@@ -1,9 +1,7 @@
 require('dotenv').config();
-
 const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
-
 mongoose.connect(process.env.CONNECTIONSTRING, {useNewUrlParser: true, useUnifiedTopology: true})
 .then(()=> {
     app.emit('pronto')
@@ -12,13 +10,17 @@ mongoose.connect(process.env.CONNECTIONSTRING, {useNewUrlParser: true, useUnifie
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const flash = require('connect-flash');
-
 const routes = require('./routes')
 const path = require('path');
-const {middlewareGlobal} = require('./src/middleware/middleware')
+
+//const helmet = require('helmet');
+//app.use(helmet());
+const csrf = require('csurf');
+
+const {middlewareGlobal, checkCsrfError, csrfMiddleware} = require('./src/middleware/middleware')
 
 app.use(express.urlencoded({extended: true}));
-
+app.use(express.json());
 app.use(express.static(path.resolve(__dirname, 'public')))
 
 const sessionOption = session({
@@ -35,10 +37,13 @@ app.use(sessionOption);
 app.use(flash())
 
 app.set('views', path.resolve(__dirname, 'src', 'views'));
-
 app.set('view engine', 'ejs');
 
+app.use(csrf());
+
 app.use(middlewareGlobal)
+app.use(checkCsrfError);
+app.use(csrfMiddleware);
 app.use(routes);
 
 app.on('pronto',()=>{
